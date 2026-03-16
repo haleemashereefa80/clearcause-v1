@@ -4,6 +4,7 @@ from datetime import date, timedelta
 from django.core.management.base import BaseCommand
 from django.utils.text import slugify
 from django.utils import timezone
+from django.db.models import Q
 from core.models import (
     User, Campaign, Donation, Volunteer, NGOProfile, 
     CampaignImage, CampaignUpdate, CampaignDocument, VerificationAssignment, 
@@ -33,21 +34,30 @@ class Command(BaseCommand):
         import os
         admin_email = os.getenv('DJANGO_SUPERUSER_EMAIL', 'admin@clearcause.com')
         admin_password = os.getenv('DJANGO_SUPERUSER_PASSWORD', 'Admin@123')
+        admin_username = os.getenv('DJANGO_SUPERUSER_USERNAME', 'admin')
         
-        admin, created = User.objects.get_or_create(
-            email=admin_email,
-            defaults={
-                'username': os.getenv('DJANGO_SUPERUSER_USERNAME', 'admin'),
-                'password': admin_password,
-                'full_name': 'ClearCause Admin',
-                'role': 'admin',
-                'is_email_verified': True
-            }
-        )
-        if created:
+        # Check if user exists by either email or username to avoid IntegrityError
+        admin = User.objects.filter(Q(email=admin_email) | Q(username=admin_username)).first()
+        
+        if not admin:
+            admin = User.objects.create_user(
+                email=admin_email,
+                username=admin_username,
+                password=admin_password,
+                full_name='ClearCause Admin',
+                role='admin',
+                is_email_verified=True
+            )
+            self.stdout.write(f'  Created new admin: {admin_email}')
+        else:
+            # Update existing admin
+            admin.email = admin_email
+            admin.username = admin_username
+            admin.role = 'admin'
+            admin.is_email_verified = True
             admin.set_password(admin_password)
             admin.save()
-            self.stdout.write(f'  Created admin: {admin_email}')
+            self.stdout.write(f'  Updated existing admin: {admin_email}')
 
         # 2. Create NGO Users and Profiles
         ngos = []
