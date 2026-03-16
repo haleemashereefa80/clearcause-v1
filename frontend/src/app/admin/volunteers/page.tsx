@@ -39,8 +39,8 @@ export default function AdminVolunteers() {
         setLoading(true);
         try {
             const [vRes, aRes] = await Promise.all([
-                api.get("/volunteers/"),
-                api.get("/assignments/"),
+                api.get("volunteers/"),
+                api.get("assignments/"),
             ]);
             setVolunteers(vRes.data?.results || vRes.data || []);
             setAssignments(aRes.data?.results || aRes.data || []);
@@ -52,7 +52,7 @@ export default function AdminVolunteers() {
         e.preventDefault();
         setFormLoading(true);
         try {
-            await api.post("/volunteers/create_volunteer/", formData);
+            await api.post("volunteers/create_volunteer/", formData);
             toast.success("Volunteer created successfully!");
             setIsModalOpen(false);
             setFormData({ full_name: "", email: "", mobile: "", password: "", region: "", specialisation: "general" });

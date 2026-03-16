@@ -144,7 +144,7 @@ export default function StartFundraiser() {
 
             if (coverImage) campaignData.append('cover_image', coverImage);
 
-            const res = await api.post('/campaigns/', campaignData);
+            const res = await api.post('campaigns/', campaignData);
             const campaignId = res.data.id;
 
             // 2. Upload Gallery Media
@@ -154,7 +154,7 @@ export default function StartFundraiser() {
                     mediaData.append('campaign', campaignId);
                     mediaData.append('file', item.file);
                     mediaData.append('media_type', item.type);
-                    await api.post('/campaign-media/', mediaData);
+                    await api.post('campaign-media/', mediaData);
                 }
             }
 
@@ -167,7 +167,7 @@ export default function StartFundraiser() {
             bankData.append('account_number', formData.account_number);
             bankData.append('ifsc_code', formData.ifsc_code);
             if (bankProof) bankData.append('bank_proof', bankProof);
-            await api.post('/bank-accounts/', bankData);
+            await api.post('bank-accounts/', bankData);
 
             // 4. Upload KYC Documents
             const kycDocs = [
@@ -183,7 +183,7 @@ export default function StartFundraiser() {
                     kycData.append('document_type', kyc.type);
                     kycData.append('document_number', kyc.number);
                     kycData.append('document_front', kyc.file);
-                    await api.post('/kyc-documents/', kycData);
+                    await api.post('kyc-documents/', kycData);
                 }
             }
 
@@ -194,7 +194,7 @@ export default function StartFundraiser() {
                 docData.append('document', doc);
                 docData.append('document_type', 'other');
                 docData.append('file_name', doc.name);
-                await api.post('/campaign-documents/', docData);
+                await api.post('campaign-documents/', docData);
             }
 
             // 6. Final Submission to change status to pending_review

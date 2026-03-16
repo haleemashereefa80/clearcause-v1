@@ -8,6 +8,11 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
+    // Strip leading slash from url to avoid overriding baseURL
+    if (config.url && config.url.startsWith('/')) {
+        config.url = config.url.substring(1);
+    }
+
     const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;

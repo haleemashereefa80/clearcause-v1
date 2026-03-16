@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const token = localStorage.getItem('access_token');
             if (token) {
                 try {
-                    const res = await api.get('/auth/me/');
+                    const res = await api.get('auth/me/');
                     setUser(res.data);
                 } catch (err: any) {
                     console.error("Failed to load user", err);
@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     const login = async (email: string, password: string) => {
-        const res = await api.post('/auth/login/', { email, password });
+        const res = await api.post('auth/login/', { email, password });
         localStorage.setItem('access_token', res.data.access);
         localStorage.setItem('refresh_token', res.data.refresh);
         localStorage.setItem('user', JSON.stringify(res.data.user));
@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const register = async (data: any) => {
-        const res = await api.post('/auth/register/', data);
+        const res = await api.post('auth/register/', data);
         localStorage.setItem('access_token', res.data.access);
         localStorage.setItem('refresh_token', res.data.refresh);
         localStorage.setItem('user', JSON.stringify(res.data.user));

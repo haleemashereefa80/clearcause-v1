@@ -16,7 +16,7 @@ export default function BrowseFundraisers() {
         const fetchCampaigns = async () => {
             setLoading(true);
             try {
-                const res = await api.get("/campaigns/", {
+                const res = await api.get("campaigns/", {
                     params: { search, category, status: 'approved' }
                 });
                 setCampaigns(res.data.results || res.data);

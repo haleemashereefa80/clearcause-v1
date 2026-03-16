@@ -34,8 +34,8 @@ export default function VolunteerDashboard() {
         setLoading(true);
         try {
             const [pRes, aRes] = await Promise.all([
-                api.get("/volunteers/me/"),
-                api.get("/assignments/"),
+                api.get("volunteers/me/"),
+                api.get("assignments/"),
             ]);
             setProfile(pRes.data);
             setAssignments(aRes.data?.results || aRes.data || []);
