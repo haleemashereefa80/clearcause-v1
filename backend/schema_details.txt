@@ -1,0 +1,46 @@
+--- TABLE: core_campaign ---
+Column: id | Type: uuid
+Column: title | Type: character varying
+Column: slug | Type: character varying
+Column: description | Type: text
+Column: category | Type: character varying
+Column: beneficiary_name | Type: character varying
+Column: beneficiary_relationship | Type: character varying
+Column: goal_amount | Type: numeric
+Column: raised_amount | Type: numeric
+Column: donor_count | Type: integer
+Column: video_url | Type: character varying
+Column: status | Type: character varying
+Column: is_verified | Type: boolean
+Column: is_featured | Type: boolean
+Column: is_urgent | Type: boolean
+Column: rejection_reason | Type: text
+Column: admin_notes | Type: text
+Column: end_date | Type: date
+Column: created_at | Type: timestamp with time zone
+Column: updated_at | Type: timestamp with time zone
+Column: organizer_id | Type: uuid
+Column: cover_image | Type: character varying
+
+--- TABLE: core_campaignimage ---
+Column: id | Type: uuid
+Column: image_url | Type: character varying
+Column: display_order | Type: integer
+Column: created_at | Type: timestamp with time zone
+Column: campaign_id | Type: uuid
+
+--- TABLE: core_campaignupdate ---
+Column: id | Type: uuid
+Column: content | Type: text
+Column: image_url | Type: character varying
+Column: created_at | Type: timestamp with time zone
+Column: campaign_id | Type: uuid
+
+--- TABLE: core_campaigndocument ---
+Column: id | Type: uuid
+Column: document_type | Type: character varying
+Column: document_url | Type: character varying
+Column: file_name | Type: character varying
+Column: uploaded_at | Type: timestamp with time zone
+Column: campaign_id | Type: uuid
+

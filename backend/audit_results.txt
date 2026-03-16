@@ -1,0 +1,9 @@
+--- AUDIT START ---
+TABLE: core_bankaccount | ALL_FOUND: ['bank_name', 'branch_name', 'campaign_id']
+TABLE: core_campaigndocument | MISSING: ['document_url']
+TABLE: core_campaignimage | MISSING: ['image_url']
+TABLE: core_campaignupdate | MISSING: ['image_url']
+TABLE: core_kycdocument | ALL_FOUND: ['campaign_id', 'document_front']
+TABLE: core_verificationdocument | ALL_FOUND: ['file']
+TABLE: core_withdrawaldocument | ALL_FOUND: ['document', 'document_type']
+--- AUDIT END ---

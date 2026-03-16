@@ -1,0 +1,11 @@
+django
+djangorestframework
+djangorestframework-simplejwt
+django-cors-headers
+psycopg2-binary
+python-dotenv
+sib-api-v3-sdk
+razorpay
+dj-database-url
+gunicorn
+pillow
