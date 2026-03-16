@@ -55,14 +55,10 @@ class LoginView(views.APIView):
             user_to_check = None
 
         user = authenticate(email=email, password=password)
-        
-        # If email authentication fails, try with username
+        # Fallback for older users or username-based login if needed, 
+        # but with USERNAME_FIELD='email', email= is the standard way.
         if not user:
-            try:
-                user_obj = User.objects.get(email=email)
-                user = authenticate(username=user_obj.username, password=password)
-            except User.DoesNotExist:
-                pass
+            user = authenticate(username=email, password=password)
 
         if user:
             # Success: reset attempts

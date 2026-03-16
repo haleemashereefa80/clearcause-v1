@@ -79,7 +79,8 @@ class VolunteerViewSet(viewsets.ModelViewSet):
             password=password,
             full_name=full_name,
             mobile=mobile,
-            role='volunteer'
+            role='volunteer',
+            is_email_verified=True
         )
 
         # Create Volunteer Profile

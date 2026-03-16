@@ -30,20 +30,24 @@ class Command(BaseCommand):
         self.stdout.write('Seeding database with end-to-end data...')
 
         # 1. Create Admin
+        import os
+        admin_email = os.getenv('DJANGO_SUPERUSER_EMAIL', 'admin@clearcause.com')
+        admin_password = os.getenv('DJANGO_SUPERUSER_PASSWORD', 'Admin@123')
+        
         admin, created = User.objects.get_or_create(
-            email='admin@clearcause.com',
+            email=admin_email,
             defaults={
-                'username': 'admin',
-                'password': 'Admin@123',
+                'username': os.getenv('DJANGO_SUPERUSER_USERNAME', 'admin'),
+                'password': admin_password,
                 'full_name': 'ClearCause Admin',
                 'role': 'admin',
                 'is_email_verified': True
             }
         )
         if created:
-            admin.set_password('Admin@123')
+            admin.set_password(admin_password)
             admin.save()
-            self.stdout.write(f'  Created admin: admin@clearcause.com')
+            self.stdout.write(f'  Created admin: {admin_email}')
 
         # 2. Create NGO Users and Profiles
         ngos = []

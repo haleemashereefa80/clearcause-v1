@@ -29,6 +29,9 @@ class User(AbstractUser):
     is_email_verified = models.BooleanField(default=False)
     kyc_status = models.CharField(max_length=20, choices=KYC_STATUS_CHOICES, default='unverified')
     
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'full_name']
+    
     # Login lockout fields
     login_attempts = models.IntegerField(default=0)
     last_failed_login = models.DateTimeField(null=True, blank=True)
