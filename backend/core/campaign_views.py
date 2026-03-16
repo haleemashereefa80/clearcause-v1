@@ -35,8 +35,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
                 raise Http404("Campaign not found")
 
     def get_queryset(self):
-        # By default, only show approved campaigns to the public
-        qs = Campaign.objects.filter(status='approved')
+        # By default, only show approved and completed campaigns to the public
+        qs = Campaign.objects.filter(status__in=['approved', 'completed'])
         
         category = self.request.query_params.get('category')
         campaign_status = self.request.query_params.get('status')

@@ -11,7 +11,7 @@ from core.models import (
     KYCDocument
 )
 
-CATEGORIES = ['medical', 'education', 'disaster', 'animal', 'ngo', 'others']
+CATEGORIES = ['medical', 'education', 'disaster', 'animals', 'ngo', 'others']
 CITIES = ['Mumbai', 'Delhi', 'Bengaluru', 'Chennai', 'Hyderabad', 'Kolkata', 'Pune', 'Ahmedabad', 'Jaipur', 'Lucknow']
 STATES = ['Maharashtra', 'Delhi', 'Karnataka', 'Tamil Nadu', 'Telangana', 'West Bengal']
 
