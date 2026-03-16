@@ -89,7 +89,7 @@ export default function VolunteerDashboard() {
                             <div className="px-2 py-0.5 bg-red-600 text-white text-[10px] font-black rounded-lg uppercase tracking-widest">Live</div>
                         </div>
                         <p className="text-sm text-slate-500 font-medium">
-                            Welcome back, <span className="text-slate-900 font-bold">{user.full_name}</span>. You have {activeJobs.length} tasks requiring immediate deployment.
+                            Welcome back, <span className="text-slate-900 font-bold">{user?.full_name}</span>. You have {activeJobs.length} tasks requiring immediate deployment.
                         </p>
                     </div>
 

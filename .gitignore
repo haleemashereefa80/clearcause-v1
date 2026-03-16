@@ -1,0 +1,27 @@
+# Environment files
+.env
+.env.local
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+db.sqlite3
+media/
+
+# Node
+node_modules/
+.next/
+out/
+build/
+dist/
+.vercel
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

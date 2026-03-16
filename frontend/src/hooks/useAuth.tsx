@@ -8,6 +8,7 @@ interface User {
     email: string;
     full_name: string;
     role: string;
+    is_staff: boolean;
     kyc_status: string;
     ngo_profile?: {
         org_name: string;
