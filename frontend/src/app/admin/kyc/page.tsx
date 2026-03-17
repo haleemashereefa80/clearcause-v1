@@ -84,71 +84,77 @@ export default function AdminKYC() {
                     ) : kycs.length === 0 ? (
                         <div className="py-20 text-center text-gray-400 font-medium">No KYC submissions.</div>
                     ) : (
-                        <div className="divide-y divide-gray-50">
-                            {kycs.map((k: any) => (
-                                <div key={k.id} className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-gray-50/50 transition-colors">
-                                    <div className="space-y-1.5 flex-1">
-                                        <p className="font-bold text-gray-900">{k.document_type || "Document"} — <span className="text-gray-500 text-sm">{k.target}</span></p>
-                                        <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-[0.1em]">
-                                            <span>ID: {k.document_number || "N/A"}</span>
-                                            <span>•</span>
-                                            <span className={`px-2 py-0.5 rounded font-black ${k.status === "approved" ? "bg-emerald-100 text-emerald-700" : k.status === "rejected" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>
-                                                {k.status}
-                                            </span>
-                                            <span>•</span>
-                                            <span>{new Date(k.submitted_at).toLocaleDateString()}</span>
+                        <div className="divide-y divide-gray-100">
+                            {Object.values(kycs.reduce((acc: any, k: any) => {
+                                const key = k.campaign || `user-${k.user}`;
+                                if (!acc[key]) acc[key] = { 
+                                    id: key, 
+                                    campaign_title: k.campaign_title, 
+                                    user_full_name: k.user_full_name,
+                                    user_email: k.user_email,
+                                    docs: [] 
+                                };
+                                acc[key].docs.push(k);
+                                return acc;
+                            }, {})).map((group: any) => (
+                                <div key={group.id} className="p-6 space-y-4">
+                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-50 pb-4">
+                                        <div>
+                                            <h3 className="font-black text-slate-900 text-lg uppercase tracking-tight">
+                                                {group.campaign_title || "Individual Verification"}
+                                            </h3>
+                                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                                                {group.user_full_name} ({group.user_email})
+                                            </p>
                                         </div>
-                                        <div className="flex gap-4 mt-3">
-                                            {k.document_front && (
-                                                <div className="flex items-center gap-3">
-                                                    <button 
-                                                        onClick={() => openPreview(k.document_front, `${k.document_type} - Front`)}
-                                                        className="text-xs font-black uppercase tracking-widest text-blue-600 hover:text-red-500 flex items-center gap-2 transition-colors"
-                                                    >
-                                                        <Eye className="w-3.5 h-3.5" /> Preview Front
-                                                    </button>
-                                                    <a 
-                                                        href={getFullFileUrl(k.document_front)} 
-                                                        target="_blank" 
-                                                        rel="noopener noreferrer"
-                                                        className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-blue-500 flex items-center gap-1.5 transition-colors"
-                                                    >
-                                                        <ExternalLink className="w-3 h-3" /> New Page
-                                                    </a>
-                                                </div>
-                                            )}
-                                            {k.document_back && (
-                                                <div className="flex items-center gap-3">
-                                                    <button 
-                                                        onClick={() => openPreview(k.document_back, `${k.document_type} - Back`)}
-                                                        className="text-xs font-black uppercase tracking-widest text-blue-600 hover:text-red-500 flex items-center gap-2 transition-colors"
-                                                    >
-                                                        <Eye className="w-3.5 h-3.5" /> Preview Back
-                                                    </button>
-                                                    <a 
-                                                        href={getFullFileUrl(k.document_back)} 
-                                                        target="_blank" 
-                                                        rel="noopener noreferrer"
-                                                        className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-blue-500 flex items-center gap-1.5 transition-colors"
-                                                    >
-                                                        <ExternalLink className="w-3 h-3" /> New Page
-                                                    </a>
-                                                </div>
-                                            )}
+                                        <div className="flex gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">
+                                            {group.docs.length} Documents
                                         </div>
                                     </div>
-                                    <div className="flex gap-2 shrink-0">
-                                        <Button 
-                                            onClick={() => {
-                                                setSelectedKYC(k);
-                                                setRejectionReason(k.rejection_reason || "");
-                                                setIsDetailsOpen(true);
-                                            }} 
-                                            variant="outline"
-                                            className="bg-white border-slate-200 text-slate-600 hover:bg-slate-50 rounded-lg h-9 px-4 text-xs font-bold"
-                                        >
-                                            View Details
-                                        </Button>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {group.docs.map((k: any) => (
+                                            <div key={k.id} className="p-4 rounded-xl border border-slate-100 bg-slate-50/30 hover:bg-white hover:shadow-md hover:border-red-100 transition-all flex flex-col justify-between gap-3">
+                                                <div>
+                                                    <div className="flex justify-between items-start mb-1">
+                                                        <p className="font-bold text-slate-900 text-xs uppercase tracking-tight">{k.document_type?.replace(/_/g, ' ')}</p>
+                                                        <span className={`px-2 py-0.5 rounded-[4px] text-[8px] font-black uppercase tracking-widest ${k.status === "approved" ? "bg-emerald-100 text-emerald-700" : k.status === "rejected" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>
+                                                            {k.status}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-[10px] text-slate-400 font-mono">#{k.document_number || "No Ref"}</p>
+                                                </div>
+
+                                                <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
+                                                    {k.document_front && (
+                                                        <button 
+                                                            onClick={() => openPreview(k.document_front, `${k.document_type} - Front`)}
+                                                            className="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-red-500 flex items-center gap-1.5 transition-colors"
+                                                        >
+                                                            <Eye className="w-3 h-3" /> Front
+                                                        </button>
+                                                    )}
+                                                    {k.document_back && (
+                                                        <button 
+                                                            onClick={() => openPreview(k.document_back, `${k.document_type} - Back`)}
+                                                            className="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-red-500 flex items-center gap-1.5 transition-colors"
+                                                        >
+                                                            <Eye className="w-3 h-3" /> Back
+                                                        </button>
+                                                    )}
+                                                    <button 
+                                                        onClick={() => {
+                                                            setSelectedKYC(k);
+                                                            setRejectionReason(k.rejection_reason || "");
+                                                            setIsDetailsOpen(true);
+                                                        }} 
+                                                        className="ml-auto text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 flex items-center gap-1 transition-colors"
+                                                    >
+                                                        Review
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
                             ))}
@@ -196,6 +202,17 @@ export default function AdminKYC() {
                                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Target Role</p>
                                         <p className="font-bold text-slate-900 capitalize">{selectedKYC.target}</p>
                                     </div>
+                                    <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100/50 col-span-2">
+                                        <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1">User Information</p>
+                                        <p className="font-bold text-slate-900">{selectedKYC.user_full_name || 'N/A'}</p>
+                                        <p className="text-xs font-medium text-slate-500">{selectedKYC.user_email || 'N/A'}</p>
+                                    </div>
+                                    {selectedKYC.campaign_title && (
+                                        <div className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100/50 col-span-2">
+                                            <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">Associated Campaign</p>
+                                            <p className="font-bold text-emerald-900 leading-tight">{selectedKYC.campaign_title}</p>
+                                        </div>
+                                    )}
                                     <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Document Number</p>
                                         <p className="font-mono font-bold text-slate-900 tracking-wider text-sm">{selectedKYC.document_number || 'Not Provided'}</p>

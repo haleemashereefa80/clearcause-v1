@@ -36,6 +36,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 class KYCDocumentSerializer(serializers.ModelSerializer):
+    campaign_title = serializers.CharField(source='campaign.title', read_only=True)
+    user_full_name = serializers.CharField(source='user.full_name', read_only=True)
+    user_email = serializers.CharField(source='user.email', read_only=True)
+    
     class Meta:
         model = KYCDocument
         fields = '__all__'
@@ -84,6 +88,7 @@ class CampaignSerializer(serializers.ModelSerializer):
     updates = CampaignUpdateSerializer(many=True, read_only=True)
     documents = CampaignDocumentSerializer(many=True, read_only=True)
     verifications = VerificationAssignmentSerializer(many=True, read_only=True)
+    kyc_documents = KYCDocumentSerializer(many=True, read_only=True)
     organizer_profile_name = serializers.CharField(source='organizer.full_name', read_only=True)
     cover_image_url = serializers.SerializerMethodField()
     
@@ -104,6 +109,7 @@ class AdminCampaignSerializer(serializers.ModelSerializer):
     """Lightweight serializer for admin campaign listing (no nested relations)."""
     organizer_name = serializers.CharField(source='organizer.full_name', read_only=True)
     cover_image_url = serializers.SerializerMethodField()
+    kyc_documents = KYCDocumentSerializer(many=True, read_only=True)
     
     class Meta:
         model = Campaign
@@ -111,7 +117,7 @@ class AdminCampaignSerializer(serializers.ModelSerializer):
             'id', 'title', 'slug', 'category', 'status', 'goal_amount', 'raised_amount',
             'donor_count', 'is_verified', 'is_featured', 'is_urgent', 'organizer_name',
             'beneficiary_name', 'rejection_reason', 'end_date', 'created_at', 'updated_at',
-            'cover_image', 'cover_image_url',
+            'cover_image', 'cover_image_url', 'kyc_documents',
         ]
 
     def get_cover_image_url(self, obj):

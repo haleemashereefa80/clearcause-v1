@@ -15,23 +15,44 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export default function WithdrawalStatusPage() {
+    const router = useRouter();
     const [withdrawals, setWithdrawals] = useState<any[]>([]);
+    const [campaigns, setCampaigns] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [fetchingCampaigns, setFetchingCampaigns] = useState(false);
 
     useEffect(() => {
-        const fetchWithdrawals = async () => {
-            try {
-                const res = await api.get("/withdrawals/");
-                setWithdrawals(res.data.results || res.data);
-            } catch (err) {
-                console.error("Failed to fetch withdrawals", err);
-            }
-            setLoading(false);
-        };
         fetchWithdrawals();
     }, []);
+
+    const fetchWithdrawals = async () => {
+        setLoading(true);
+        try {
+            const res = await api.get("/withdrawals/");
+            setWithdrawals(res.data.results || res.data);
+        } catch (err) {
+            console.error("Failed to fetch withdrawals", err);
+        }
+        setLoading(false);
+    };
+
+    const fetchUserCampaigns = async () => {
+        setFetchingCampaigns(true);
+        try {
+            const res = await api.get("/campaigns/?organizer=me");
+            // Only show approved campaigns for withdrawal
+            const approved = (res.data.results || res.data).filter((c: any) => c.status === 'approved');
+            setCampaigns(approved);
+            setIsModalOpen(true);
+        } catch (err) {
+            console.error("Failed to fetch campaigns", err);
+        }
+        setFetchingCampaigns(false);
+    };
 
     const getStatusStyle = (status: string) => {
         switch (status) {
@@ -57,11 +78,18 @@ export default function WithdrawalStatusPage() {
                             Track your fund transfers and status
                         </p>
                     </div>
-                    <Link href="/dashboard/campaigns">
-                        <Button className="rounded-2xl h-12 px-6 font-black bg-primary text-white shadow-xl shadow-primary/20">
-                            <Plus className="w-4 h-4 mr-2 stroke-[3]" /> New Withdrawal
-                        </Button>
-                    </Link>
+                    <Button 
+                        onClick={fetchUserCampaigns}
+                        disabled={fetchingCampaigns}
+                        className="rounded-2xl h-12 px-6 font-black bg-primary text-white shadow-xl shadow-primary/20"
+                    >
+                        {fetchingCampaigns ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                            <Plus className="w-4 h-4 mr-2 stroke-[3]" />
+                        )}
+                        New Withdrawal
+                    </Button>
                 </header>
 
                 {loading ? (
@@ -109,9 +137,11 @@ export default function WithdrawalStatusPage() {
                                                 <p className="font-bold text-gray-900">{w.transfer_reference}</p>
                                             </div>
                                         )}
-                                        <Button variant="outline" className="rounded-xl font-black border-gray-100 text-gray-500 hover:text-primary transition-all">
-                                            View Details
-                                        </Button>
+                                        <Link href={`/dashboard/withdrawals/${w.id}`}>
+                                            <Button variant="outline" className="rounded-xl font-black border-gray-100 text-gray-500 hover:text-primary transition-all">
+                                                View Details
+                                            </Button>
+                                        </Link>
                                     </div>
                                 </div>
                                 {w.rejection_reason && (
@@ -128,6 +158,55 @@ export default function WithdrawalStatusPage() {
                     </div>
                 )}
             </main>
+
+            {/* Campaign Selection Modal */}
+            {isModalOpen && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+                    <div className="bg-white rounded-[2.5rem] p-8 w-full max-w-xl shadow-2xl space-y-8 animate-in zoom-in-95 duration-300">
+                        <div className="space-y-2">
+                            <h2 className="text-3xl font-black text-gray-900 tracking-tighter uppercase italic">Select Campaign</h2>
+                            <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Choose an approved campaign to withdraw funds from</p>
+                        </div>
+
+                        <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                            {campaigns.length === 0 ? (
+                                <div className="text-center py-12 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-100 italic font-medium text-gray-400">
+                                    No approved campaigns found for withdrawal.
+                                </div>
+                            ) : (
+                                campaigns.map((c) => (
+                                    <button
+                                        key={c.id}
+                                        onClick={() => router.push(`/dashboard/campaigns/${c.slug || c.id}/withdraw`)}
+                                        className="w-full group flex items-center gap-4 p-4 rounded-2xl border border-gray-100 hover:border-primary/30 hover:bg-primary/5 transition-all text-left"
+                                    >
+                                        <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 shrink-0">
+                                            <img src={c.cover_image_url || "https://picsum.photos/seed/cause/100/100"} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                        </div>
+                                        <div className="flex-grow">
+                                            <h4 className="font-black text-gray-900 group-hover:text-primary transition-colors">{c.title}</h4>
+                                            <div className="flex items-center gap-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+                                                <span>Raised: ₹{parseFloat(c.raised_amount).toLocaleString()}</span>
+                                                <span>•</span>
+                                                <span className="text-primary">Available for transfer</span>
+                                            </div>
+                                        </div>
+                                        <ArrowUpRight className="w-5 h-5 text-gray-300 group-hover:text-primary transition-colors" />
+                                    </button>
+                                ))
+                            )}
+                        </div>
+
+                        <Button 
+                            variant="ghost" 
+                            onClick={() => setIsModalOpen(false)}
+                            className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-xs text-gray-400 hover:text-gray-900 hover:bg-gray-50"
+                        >
+                            Cancel
+                        </Button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

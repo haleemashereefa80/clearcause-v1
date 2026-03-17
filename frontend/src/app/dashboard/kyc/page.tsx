@@ -24,7 +24,7 @@ export default function KYCManagement() {
 
     // Form state
     const [formData, setFormData] = useState({
-        target: 'organizer',
+        target: 'beneficiary',
         document_type: 'aadhaar',
         document_number: '',
     });
@@ -72,7 +72,7 @@ export default function KYCManagement() {
                 data.append('document_back', files.back);
             }
 
-            await api.post('/kyc/submit/', data, {
+            await api.post('kyc-documents/', data, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             fetchKYC();
@@ -122,7 +122,7 @@ export default function KYCManagement() {
                                                 </div>
                                                 <div>
                                                     <p className="font-black text-gray-900 uppercase tracking-tight">
-                                                        {kyc.target} • {kyc.document_type.replace('_', ' ')}
+                                                        {kyc.document_type.replace('_', ' ')}
                                                     </p>
                                                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
                                                         Number: {kyc.document_number || 'Pending'}
@@ -171,8 +171,8 @@ export default function KYCManagement() {
                                         value={formData.target}
                                         onChange={(e) => setFormData({ ...formData, target: e.target.value })}
                                     >
-                                        <option value="organizer">Organizer</option>
                                         <option value="beneficiary">Beneficiary</option>
+                                        <option value="organizer">Organizer</option>
                                     </select>
                                 </div>
 
@@ -272,8 +272,8 @@ export default function KYCManagement() {
                                 <h4 className="font-black uppercase tracking-widest text-xs">KYC Requirements</h4>
                             </div>
                             <ul className="space-y-2 text-[10px] font-bold text-amber-800/70 uppercase tracking-wider leading-relaxed">
-                                <li>• Organizer: Aadhaar & PAN mandatory</li>
-                                <li>• Beneficiary: Valid Govt ID required</li>
+                                <li>• Valid Government ID is mandatory</li>
+                                <li>• Aadhaar, PAN, Voter ID, or Passport</li>
                                 <li>• Image specs: Clear, readable, Max 5MB</li>
                                 <li>• Verification takes 24-48 hours</li>
                             </ul>

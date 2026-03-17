@@ -118,15 +118,14 @@ class WithdrawalViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         user = self.request.user
         
-        # 1. Enforce KYC Status (Organizer & Beneficiary)
-        # Check for approved organizer documents
-        organizer_approved = KYCDocument.objects.filter(user=user, target='organizer', status='approved').exists()
-        # Check for approved beneficiary documents
-        beneficiary_approved = KYCDocument.objects.filter(user=user, target='beneficiary', status='approved').exists()
+        # 1. Enforce KYC Status
+        # As per user request: "one correction the kyc document they upload is of the benficiary itself so no nee for both beneficiary and organizer"
+        # We check for ANY approved KYC document for this user to ensure they can move forward if they already have one verified.
+        kyc_approved = KYCDocument.objects.filter(user=user, status='approved').exists()
         
-        if not organizer_approved or not beneficiary_approved:
+        if not kyc_approved:
             from rest_framework.exceptions import PermissionDenied
-            raise PermissionDenied("Both Organizer and Beneficiary KYC must be 'approved' before requesting a withdrawal.")
+            raise PermissionDenied("KYC verification must be 'approved' before requesting a withdrawal.")
             
         campaign = serializer.validated_data['campaign']
         amount = serializer.validated_data['amount']

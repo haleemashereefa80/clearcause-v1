@@ -197,6 +197,8 @@ export default function StartFundraiser() {
                     kycData.append('document_type', kyc.type);
                     kycData.append('document_number', kyc.number);
                     kycData.append('document_front', kyc.file);
+                    // KYC documents are for the beneficiary as per user request
+                    kycData.append('target', 'beneficiary');
                     await api.post('kyc-documents/', kycData);
                 }
             }

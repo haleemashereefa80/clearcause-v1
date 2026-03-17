@@ -46,6 +46,12 @@ export default function WithdrawalWizard() {
     const [transferOption, setTransferOption] = useState("bank");
     const [isCreatingBank, setIsCreatingBank] = useState(false);
     const [transactionId, setTransactionId] = useState("");
+    const [destinationDetails, setDestinationDetails] = useState({
+        account_name: '',
+        account_number: '',
+        ifsc: '',
+        bank_name: ''
+    });
 
     useEffect(() => {
         const fetchData = async () => {
@@ -101,7 +107,11 @@ export default function WithdrawalWizard() {
                 campaign: campaign.id,
                 bank_account: selectedBank,
                 amount: withdrawalAmount,
-                transfer_option: transferOption
+                transfer_option: transferOption,
+                destination_account_name: transferOption !== 'bank' ? destinationDetails.account_name : '',
+                destination_account_number: transferOption !== 'bank' ? destinationDetails.account_number : '',
+                destination_ifsc: transferOption !== 'bank' ? destinationDetails.ifsc : '',
+                destination_bank_name: transferOption !== 'bank' ? destinationDetails.bank_name : '',
             });
 
             const withdrawalId = res.data.id;
@@ -270,61 +280,59 @@ export default function WithdrawalWizard() {
                     {step === 2 && (
                         <div className="space-y-10">
                             <div className="space-y-3">
-                                <h2 className="text-2xl font-black text-gray-900 tracking-tight italic">KYC Verification Check</h2>
-                                <p className="text-gray-400 font-medium">Both Organizer and Beneficiary identity verification is mandatory for medical funds.</p>
+                                <h2 className="text-2xl font-black text-gray-900 tracking-tight italic">Identity Verification</h2>
+                                <p className="text-gray-400 font-medium text-sm">Verification of the beneficiary's identity is mandatory for fund security.</p>
                             </div>
 
                             <div className="space-y-4">
-                                {[
-                                    { label: 'Organizer KYC', target: 'organizer' },
-                                    { label: 'Beneficiary KYC', target: 'beneficiary' }
-                                ].map((group) => {
-                                    const docs = kycDocs.filter(d => d.target === group.target);
-                                    const isVerified = docs.some(d => d.status === 'approved');
-                                    const isPending = docs.some(d => d.status === 'pending');
-                                    const isRejected = docs.some(d => d.status === 'rejected');
+                                {(() => {
+                                    const isVerified = kycDocs.some(d => d.status === 'approved');
+                                    const isPending = kycDocs.some(d => d.status === 'pending');
+                                    const isRejected = kycDocs.some(d => d.status === 'rejected');
 
                                     return (
-                                        <div key={group.target} className={`flex items-center justify-between p-6 rounded-[2rem] border ${isVerified ? 'bg-green-50/50 border-green-100' : 'bg-gray-50/50 border-gray-100'}`}>
-                                            <div className="flex items-center gap-4">
-                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isVerified ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400'}`}>
-                                                    <ShieldCheck className="w-6 h-6" />
+                                        <div className={`flex items-center justify-between p-8 rounded-[2.5rem] border-2 transition-all ${isVerified ? 'bg-green-50/30 border-green-100' : 'bg-gray-50/50 border-gray-100'}`}>
+                                            <div className="flex items-center gap-6">
+                                                <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center transition-all ${isVerified ? 'bg-green-500 text-white shadow-lg shadow-green-100' : 'bg-gray-200 text-gray-400'}`}>
+                                                    <ShieldCheck className="w-8 h-8" />
                                                 </div>
                                                 <div>
-                                                    <p className="font-black text-gray-900 uppercase tracking-tight text-sm">{group.label}</p>
-                                                    <p className={`text-[8px] font-black uppercase tracking-widest ${isVerified ? 'text-green-600' : isPending ? 'text-orange-500' : 'text-gray-400'}`}>
-                                                        {isVerified ? 'Verified' : isPending ? 'Verification Under Review' : isRejected ? 'Verification Rejected' : 'Not Submitted'}
+                                                    <p className="font-black text-gray-900 uppercase tracking-tight text-lg italic">Verification Status</p>
+                                                    <p className={`text-[10px] font-black uppercase tracking-widest ${isVerified ? 'text-green-600' : isPending ? 'text-orange-500' : 'text-gray-400'}`}>
+                                                        {isVerified ? 'Approved & Ready' : isPending ? 'Under Review' : isRejected ? 'Verification Failed' : 'Action Required'}
                                                     </p>
                                                 </div>
                                             </div>
                                             {isVerified ? (
-                                                <CheckCircle2 className="w-6 h-6 text-green-500" />
+                                                <div className="flex items-center gap-2 text-green-500 bg-green-50 px-4 py-2 rounded-xl border border-green-100">
+                                                    <CheckCircle2 className="w-5 h-5" />
+                                                    <span className="text-[10px] font-black uppercase tracking-widest">Verified</span>
+                                                </div>
                                             ) : (
                                                 <Button
                                                     variant="outline"
                                                     onClick={() => router.push('/dashboard/kyc')}
-                                                    className="h-9 px-4 rounded-xl font-black text-[10px] uppercase tracking-widest border-primary/20 text-primary hover:bg-primary hover:text-white"
+                                                    className="h-12 px-8 rounded-2xl font-black text-xs uppercase tracking-widest border-primary/20 text-primary hover:bg-primary hover:text-white shadow-lg shadow-primary/5 transition-all active:scale-95"
                                                 >
-                                                    {docs.length > 0 ? 'View Status' : 'Upload Docs'}
+                                                    {kycDocs.length > 0 ? 'Check Status' : 'Upload Documents'}
                                                 </Button>
                                             )}
                                         </div>
                                     );
-                                })}
+                                })()}
                             </div>
 
-                            {(kycDocs.filter(d => d.target === 'organizer' && d.status === 'approved').length === 0 ||
-                                kycDocs.filter(d => d.target === 'beneficiary' && d.status === 'approved').length === 0) && (
-                                    <div className="bg-amber-50 p-6 rounded-2xl border border-amber-100 flex items-start gap-4">
-                                        <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-                                        <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-amber-900 uppercase tracking-tight">Withdrawal Restricted</p>
-                                            <p className="text-[10px] font-bold text-amber-800/70 uppercase tracking-tight leading-relaxed">
-                                                Funds can only be released after both organizer and beneficiary identities are approved by our audit team.
-                                            </p>
-                                        </div>
+                            {!kycDocs.some(d => d.status === 'approved') && (
+                                <div className="bg-amber-50 p-8 rounded-[2rem] border-2 border-amber-100/50 flex items-start gap-6">
+                                    <AlertCircle className="w-6 h-6 text-amber-500 shrink-0 mt-1" />
+                                    <div className="space-y-2">
+                                        <p className="text-xs font-black text-amber-900 uppercase tracking-tight italic">Withdrawal Restricted</p>
+                                        <p className="text-[10px] font-bold text-amber-800/70 uppercase tracking-tight leading-relaxed">
+                                            Funds can only be released after identity verification (KYC) is approved by our audit team. Please ensure a valid government ID is uploaded.
+                                        </p>
                                     </div>
-                                )}
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -436,6 +444,45 @@ export default function WithdrawalWizard() {
                                         </div>
                                         <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest px-2">A flat 2% processing fee may apply</p>
                                     </div>
+
+                                    {transferOption !== 'bank' && (
+                                        <div className="pt-8 border-t border-gray-200/50 space-y-6 animate-in slide-in-from-top-4 duration-500">
+                                            <div className="space-y-1">
+                                                <h4 className="text-sm font-black text-gray-900 uppercase tracking-tight">Destination Bank Details</h4>
+                                                <p className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Enter the bank details for the {transferOption}</p>
+                                            </div>
+                                            
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="space-y-1.5">
+                                                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest pl-1">Account Holder Name</label>
+                                                    <input 
+                                                        className="w-full h-12 rounded-xl border border-gray-100 bg-white px-5 font-bold text-sm" 
+                                                        placeholder="e.g. Apollo Hospital"
+                                                        value={destinationDetails.account_name}
+                                                        onChange={e => setDestinationDetails({...destinationDetails, account_name: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div className="space-y-1.5">
+                                                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest pl-1">IFSC Code</label>
+                                                    <input 
+                                                        className="w-full h-12 rounded-xl border border-gray-100 bg-white px-5 font-bold text-sm uppercase" 
+                                                        placeholder="HDFC0001234"
+                                                        value={destinationDetails.ifsc}
+                                                        onChange={e => setDestinationDetails({...destinationDetails, ifsc: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div className="space-y-1.5 md:col-span-2">
+                                                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest pl-1">Account Number</label>
+                                                    <input 
+                                                        className="w-full h-12 rounded-xl border border-gray-100 bg-white px-5 font-bold text-sm" 
+                                                        placeholder="Enter account number"
+                                                        value={destinationDetails.account_number}
+                                                        onChange={e => setDestinationDetails({...destinationDetails, account_number: e.target.value})}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -481,8 +528,7 @@ export default function WithdrawalWizard() {
                                     onClick={() => setStep(step + 1)}
                                     disabled={
                                         (step === 1 && !selectedBank) ||
-                                        (step === 2 && (kycDocs.filter(d => d.target === 'organizer' && d.status === 'approved').length === 0 ||
-                                            kycDocs.filter(d => d.target === 'beneficiary' && d.status === 'approved').length === 0)) ||
+                                        (step === 2 && !kycDocs.some(d => d.status === 'approved')) ||
                                         (step === 3 && utilizationBills.length === 0)
                                     }
                                     className="h-14 px-10 rounded-2xl font-black bg-primary text-white shadow-xl shadow-primary/20 flex items-center gap-3 transition-all active:scale-95"
@@ -492,7 +538,11 @@ export default function WithdrawalWizard() {
                             ) : (
                                 <Button
                                     onClick={handleWithdrawalSubmit}
-                                    disabled={!withdrawalAmount || parseFloat(withdrawalAmount) <= 0}
+                                    disabled={
+                                        !withdrawalAmount || 
+                                        parseFloat(withdrawalAmount) <= 0 ||
+                                        (transferOption !== 'bank' && (!destinationDetails.account_name || !destinationDetails.account_number || !destinationDetails.ifsc))
+                                    }
                                     className="h-14 px-12 rounded-2xl font-black bg-primary text-white shadow-xl shadow-primary/20 flex items-center gap-3 transition-all active:scale-95"
                                 >
                                     Confirm Transfer <Send className="w-5 h-5" />

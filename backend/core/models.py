@@ -233,6 +233,13 @@ class Withdrawal(models.Model):
     bank_account = models.ForeignKey(BankAccount, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     transfer_option = models.CharField(max_length=20, choices=TRANSFER_CHOICES, default='bank')
+    
+    # Destination Bank Details (for non-beneficiary transfers)
+    destination_account_name = models.CharField(max_length=255, blank=True, null=True)
+    destination_account_number = models.CharField(max_length=20, blank=True, null=True)
+    destination_ifsc = models.CharField(max_length=11, blank=True, null=True)
+    destination_bank_name = models.CharField(max_length=255, blank=True, null=True)
+    
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     rejection_reason = models.TextField(blank=True, null=True)
     transfer_reference = models.CharField(max_length=255, blank=True, null=True)
