@@ -30,6 +30,8 @@ export default function StartFundraiser() {
         // KYC Details
         aadhaar_number: "",
         pan_number: "",
+        // Dates
+        end_date: "",
     });
     const [showAccountNumber, setShowAccountNumber] = useState(false);
     const [coverImage, setCoverImage] = useState<File | null>(null);
@@ -54,8 +56,15 @@ export default function StartFundraiser() {
         }
         // Step 1: Basic Details
         if (currentStep === 1) {
-            if (!formData.title || !formData.beneficiary_name || !formData.organizer_name || !formData.goal_amount || !coverImage) {
-                alert("Please fill all mandatory basic details and upload a cover image.");
+            if (!formData.title || !formData.beneficiary_name || !formData.organizer_name || !formData.goal_amount || !formData.end_date || !coverImage) {
+                alert("Please fill all mandatory basic details, including a valid end date, and upload a cover image.");
+                return;
+            }
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const selectedDate = new Date(formData.end_date);
+            if (selectedDate <= today) {
+                alert("End date must be in the future.");
                 return;
             }
         }
@@ -81,6 +90,10 @@ export default function StartFundraiser() {
         if (currentStep === 4) {
             if (!formData.aadhaar_number || !formData.pan_number || !aadhaarFront || !panCard || !selfie) {
                 alert("Please fill all mandatory KYC details and upload pictures.");
+                return;
+            }
+            if (formData.aadhaar_number.length !== 12 || !/^\d+$/.test(formData.aadhaar_number)) {
+                alert("Aadhaar Number must be exactly 12 digits.");
                 return;
             }
         }
@@ -131,6 +144,7 @@ export default function StartFundraiser() {
             campaignData.append('beneficiary_name', formData.beneficiary_name);
             campaignData.append('beneficiary_relationship', formData.beneficiary_relationship);
             campaignData.append('goal_amount', formData.goal_amount);
+            campaignData.append('end_date', formData.end_date);
             
             let finalDescription = formData.description;
             if (formData.category === "others" && formData.other_category_reason) {
@@ -303,6 +317,14 @@ export default function StartFundraiser() {
                                             type="number"
                                             value={formData.goal_amount}
                                             onChange={(e) => setFormData({ ...formData, goal_amount: e.target.value })} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold uppercase tracking-widest text-gray-500 pl-1">End Date <span className="text-red-500">*</span></label>
+                                        <input
+                                            className="w-full h-14 rounded-xl border border-primary/10 px-4 focus:ring-2 focus:ring-primary focus:outline-none"
+                                            type="date"
+                                            value={formData.end_date}
+                                            onChange={(e) => setFormData({ ...formData, end_date: e.target.value })} />
                                     </div>
                                     <div className="space-y-2 col-span-1 md:col-span-2">
                                         <label className="text-xs font-bold uppercase tracking-widest text-gray-500 pl-1">Cover Image <span className="text-red-500">*</span></label>

@@ -70,10 +70,10 @@ export default function Sidebar() {
             <div className="p-6 border-t border-gray-50 space-y-4">
                 <div className="flex items-center gap-3 px-2">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-lg">
-                        {user?.full_name?.charAt(0) || "U"}
+                        {(user as any)?.username?.charAt(0) || user?.full_name?.charAt(0) || "U"}
                     </div>
                     <div className="flex-grow overflow-hidden">
-                        <p className="text-sm font-black text-gray-900 truncate">{user?.full_name || "User"}</p>
+                        <p className="text-sm font-black text-gray-900 truncate">{(user as any)?.username || user?.full_name || "User"}</p>
                         <p className="text-[10px] font-bold text-gray-400 truncate uppercase tracking-widest">{user?.role || "Member"}</p>
                     </div>
                 </div>

@@ -10,8 +10,8 @@ from .models import (
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'email', 'full_name', 'mobile', 'role', 'profile_photo_url', 'city', 'state', 'kyc_status', 'is_email_verified', 'is_staff', 'is_active')
-        read_only_fields = ('id', 'is_email_verified', 'kyc_status')
+        fields = ('id', 'username', 'email', 'full_name', 'mobile', 'role', 'profile_photo_url', 'city', 'state', 'kyc_status', 'is_email_verified', 'is_staff', 'is_active')
+        read_only_fields = ('id', 'username', 'is_email_verified', 'kyc_status')
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -85,15 +85,25 @@ class CampaignSerializer(serializers.ModelSerializer):
     documents = CampaignDocumentSerializer(many=True, read_only=True)
     verifications = VerificationAssignmentSerializer(many=True, read_only=True)
     organizer_profile_name = serializers.CharField(source='organizer.full_name', read_only=True)
+    cover_image_url = serializers.SerializerMethodField()
     
     class Meta:
         model = Campaign
         fields = '__all__'
         read_only_fields = ('id', 'slug', 'organizer', 'raised_amount', 'donor_count', 'status', 'is_verified', 'is_featured', 'created_at', 'updated_at')
 
+    def get_cover_image_url(self, obj):
+        if obj.cover_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.cover_image.url)
+            return obj.cover_image.url
+        return None
+
 class AdminCampaignSerializer(serializers.ModelSerializer):
     """Lightweight serializer for admin campaign listing (no nested relations)."""
     organizer_name = serializers.CharField(source='organizer.full_name', read_only=True)
+    cover_image_url = serializers.SerializerMethodField()
     
     class Meta:
         model = Campaign
@@ -101,7 +111,16 @@ class AdminCampaignSerializer(serializers.ModelSerializer):
             'id', 'title', 'slug', 'category', 'status', 'goal_amount', 'raised_amount',
             'donor_count', 'is_verified', 'is_featured', 'is_urgent', 'organizer_name',
             'beneficiary_name', 'rejection_reason', 'end_date', 'created_at', 'updated_at',
+            'cover_image', 'cover_image_url',
         ]
+
+    def get_cover_image_url(self, obj):
+        if obj.cover_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.cover_image.url)
+            return obj.cover_image.url
+        return None
 
 class DonationSerializer(serializers.ModelSerializer):
     class Meta:

@@ -14,11 +14,23 @@ interface FundraiserCardProps {
         donor_count: number;
         category: string;
         is_verified?: boolean;
+        end_date?: string;
     };
 }
 
 export default function FundraiserCard({ campaign }: FundraiserCardProps) {
     const progress = Math.min((campaign.raised_amount / campaign.goal_amount) * 100, 100);
+
+    const getDaysLeft = (dateStr?: string) => {
+        if (!dateStr) return null;
+        const end = new Date(dateStr);
+        const now = new Date();
+        const diffTime = end.getTime() - now.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays > 0 ? diffDays : 0;
+    };
+
+    const daysLeft = getDaysLeft(campaign.end_date);
 
     return (
         <div className="bg-white rounded-2xl border border-primary/5 overflow-hidden group hover:shadow-xl hover:shadow-primary/5 transition-all">
@@ -64,7 +76,12 @@ export default function FundraiserCard({ campaign }: FundraiserCardProps) {
                 </div>
 
                 <div className="flex items-center justify-between pt-2 border-t border-primary/5">
-                    <p className="text-xs text-muted-foreground"><span className="font-bold text-gray-900">{campaign.donor_count}</span> Donors</p>
+                    <div className="flex flex-col">
+                        <p className="text-xs text-muted-foreground"><span className="font-bold text-gray-900">{campaign.donor_count}</span> Donors</p>
+                        {daysLeft !== null && (
+                            <p className="text-[10px] font-bold text-primary uppercase tracking-wider">{daysLeft} Days Left</p>
+                        )}
+                    </div>
                     <Link href={`/fundraisers/${campaign.slug}`}>
                         <Button size="sm" variant="outline" className="text-xs h-8 px-4">See Details</Button>
                     </Link>

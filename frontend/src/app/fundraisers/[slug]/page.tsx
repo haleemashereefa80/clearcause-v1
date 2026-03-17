@@ -51,6 +51,17 @@ export default function CampaignDetail() {
             : `https://clearcause.org/fundraisers/${campaign.slug}`;
     const whatsappText = `Support ${campaign.beneficiary_name || "this cause"}\n\n${campaign.title}\n\nRaised Rs.${Math.round(raisedAmount).toLocaleString()} of Rs.${Math.round(goalAmount).toLocaleString()} (${Math.round(progress)}%)\n\nDonate and share:\n${campaignUrl}`;
     const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(whatsappText)}`;
+    
+    const getDaysLeft = (dateStr?: string) => {
+        if (!dateStr) return null;
+        const end = new Date(dateStr);
+        const now = new Date();
+        const diffTime = end.getTime() - now.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays > 0 ? diffDays : 0;
+    };
+
+    const daysLeft = getDaysLeft(campaign.end_date);
 
     return (
         <>
@@ -113,6 +124,9 @@ export default function CampaignDetail() {
                                             <span className="font-bold text-lg text-primary">Rs.{Math.round(raisedAmount).toLocaleString()}</span>
                                             <span className="text-gray-500 text-sm"> of Rs.{Math.round(goalAmount).toLocaleString()}</span>
                                         </p>
+                                        {campaign.end_date && (
+                                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Ends on {new Date(campaign.end_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                                        )}
                                     </div>
                                 </div>
 

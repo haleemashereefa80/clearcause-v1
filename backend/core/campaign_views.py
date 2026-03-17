@@ -42,14 +42,19 @@ class CampaignViewSet(viewsets.ModelViewSet):
         campaign_status = self.request.query_params.get('status')
         organizer = self.request.query_params.get('organizer')
         
-        # If an authenticated user is viewing their own campaigns, show all their campaigns regardless of status
-        if organizer == 'me' and self.request.user.is_authenticated:
-            qs = Campaign.objects.filter(organizer=self.request.user)
+        # If an authenticated user is viewing their own campaigns, show all their campaigns
+        if self.request.user.is_authenticated:
+            if organizer == 'me':
+                qs = Campaign.objects.filter(organizer=self.request.user)
+            elif self.kwargs.get('slug'):
+                # When looking up a specific campaign, allow owner to see it regardless of status
+                campaign_owner_qs = Campaign.objects.filter(organizer=self.request.user)
+                qs = (qs | campaign_owner_qs).distinct()
             
         if category:
             qs = qs.filter(category=category)
             
-        # If a specific status is requested, apply it (will combine with 'approved' default unless overridden by 'me')
+        # If a specific status is requested, apply it
         if campaign_status:
             qs = qs.filter(status=campaign_status)
             

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Heart, Loader2 } from "lucide-react";
+import { Heart, Loader2, Eye, EyeOff } from "lucide-react";
 
 export default function RegisterPage() {
     const [formData, setFormData] = useState({
@@ -18,6 +18,8 @@ export default function RegisterPage() {
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const { register } = useAuth();
     const router = useRouter();
 
@@ -123,21 +125,39 @@ export default function RegisterPage() {
                     </div>
                     <div className="space-y-1">
                         <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-1">Password <span className="text-red-500">*</span></label>
-                        <input
-                            type="password" placeholder="••••••••"
-                            className="w-full h-14 rounded-2xl border border-primary/20 px-4 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
-                            value={formData.password}
-                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        />
+                        <div className="relative">
+                            <input
+                                type={showPassword ? "text" : "password"} placeholder="••••••••"
+                                className="w-full h-14 rounded-2xl border border-primary/20 px-4 focus:ring-2 focus:ring-primary focus:outline-none transition-all pr-12"
+                                value={formData.password}
+                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors"
+                            >
+                                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            </button>
+                        </div>
                     </div>
                     <div className="space-y-1">
                         <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-1">Confirm Password <span className="text-red-500">*</span></label>
-                        <input
-                            type="password" placeholder="••••••••"
-                            className="w-full h-14 rounded-2xl border border-primary/20 px-4 focus:ring-2 focus:ring-primary focus:outline-none transition-all"
-                            value={formData.confirmPassword}
-                            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                        />
+                        <div className="relative">
+                            <input
+                                type={showConfirmPassword ? "text" : "password"} placeholder="••••••••"
+                                className="w-full h-14 rounded-2xl border border-primary/20 px-4 focus:ring-2 focus:ring-primary focus:outline-none transition-all pr-12"
+                                value={formData.confirmPassword}
+                                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors"
+                            >
+                                {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            </button>
+                        </div>
                     </div>
 
                     <div className="md:col-span-2 pt-2">
