@@ -12,10 +12,15 @@ from .serializers import (
     VolunteerSerializer, VerificationAssignmentSerializer,
     CampaignSerializer, UserSerializer, WithdrawalSerializer,
     KYCDocumentSerializer, VerificationDocumentSerializer,
-    AuditLogSerializer, BankAccountSerializer, DonationSerializer,
+    AuditLogSerializer, BankAccountSerializer, DonationSerializer, AdminDonationSerializer,
     AdminCampaignSerializer, NGOProfileSerializer
 )
-from .notifications import send_kyc_status_update
+from .notifications import send_kyc_status_update, send_donation_confirmation
+import razorpay
+from django.conf import settings
+
+def get_razorpay_client():
+    return razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
 
 class IsAdminRole(permissions.BasePermission):
@@ -570,3 +575,67 @@ class AdminNGOViewSet(viewsets.ModelViewSet):
             details={'reason': request.data.get('reason')}
         )
         return Response({'status': 'NGO profile rejected'})
+
+class AdminDonationViewSet(viewsets.ModelViewSet):
+    queryset = Donation.objects.all().order_by('-created_at')
+    serializer_class = AdminDonationSerializer
+    permission_classes = [IsAdminRole]
+
+    @action(detail=True, methods=['post'], url_path='sync-status')
+    def sync_status(self, request, pk=None):
+        donation = self.get_object()
+        if not donation.gateway_order_id:
+            return Response({'error': 'No order ID found'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            client = get_razorpay_client()
+            # Fetch payments for this order
+            payments = client.order.fetch_payments(donation.gateway_order_id)
+            
+            captured_payment = None
+            failed_payment = None
+            for p in payments['items']:
+                if p['status'] == 'captured':
+                    captured_payment = p
+                    break
+                elif p['status'] == 'failed':
+                    failed_payment = p
+            
+            if captured_payment:
+                # Update donation record
+                donation.gateway_payment_id = captured_payment['id']
+                donation.status = 'completed'
+                donation.payment_method = captured_payment.get('method')
+                donation.failure_reason = None # Clear any previous failure reason
+                donation.save()
+                
+                # Update campaign amounts
+                campaign = donation.campaign
+                campaign.raised_amount += donation.amount
+                campaign.donor_count += 1
+                campaign.save()
+                
+                send_donation_confirmation(donation.donor_email, donation.amount, campaign.title)
+                
+                return Response({
+                    'status': 'Sync successful',
+                    'new_status': 'completed',
+                    'payment_id': captured_payment['id']
+                })
+            elif failed_payment:
+                donation.gateway_payment_id = failed_payment['id']
+                donation.status = 'failed'
+                donation.failure_reason = failed_payment.get('error_description') or failed_payment.get('error_reason') or 'Payment failed'
+                donation.save()
+                return Response({
+                    'status': 'Sync successful: Payment confirmed as failed',
+                    'new_status': 'failed',
+                    'reason': donation.failure_reason
+                })
+            else:
+                return Response({
+                    'status': 'No captured or failed payment found in Razorpay',
+                    'current_status': donation.status
+                })
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -129,8 +129,18 @@ export default function DonationModal({ isOpen, onClose, campaignId, campaignTit
             };
 
             const razorpayInstance = new (window as any).Razorpay(options);
-            razorpayInstance.on('payment.failed', function (response: any) {
-                alert(response.error.description);
+            razorpayInstance.on('payment.failed', async function (response: any) {
+                // Report failure to backend
+                try {
+                    await api.post("/donations/confirm-failure/", {
+                        razorpay_order_id: response.error.metadata?.order_id || orderData.order_id,
+                        razorpay_payment_id: response.error.metadata?.payment_id,
+                        reason: response.error.description || response.error.reason || "Payment failed"
+                    });
+                } catch (e) {
+                    console.error("Failed to report payment failure:", e);
+                }
+                alert(response.error.description || "Payment failed. Please try again.");
             });
             razorpayInstance.open();
 

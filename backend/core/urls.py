@@ -7,7 +7,7 @@ from .finance_views import DonationViewSet, WithdrawalViewSet, BankAccountViewSe
 from .admin_views import (
     VolunteerViewSet, VerificationAssignmentViewSet, VerificationDocumentViewSet,
     AdminDashboardView, AdminCampaignViewSet, AdminUserViewSet,
-    AdminWithdrawalViewSet, AdminKYCViewSet, AuditLogViewSet, AdminNGOViewSet
+    AdminWithdrawalViewSet, AdminKYCViewSet, AuditLogViewSet, AdminNGOViewSet, AdminDonationViewSet
 )
 from .dashboard_views import DashboardSummaryView
 
@@ -33,6 +33,7 @@ router.register(r'admin/withdrawals', AdminWithdrawalViewSet, basename='admin-wi
 router.register(r'admin/kyc', AdminKYCViewSet, basename='admin-kyc')
 router.register(r'admin/ngos', AdminNGOViewSet, basename='admin-ngo')
 router.register(r'admin/audit-logs', AuditLogViewSet, basename='admin-audit-log')
+router.register(r'admin/donations', AdminDonationViewSet, basename='admin-donations')
 
 urlpatterns = [
     path('', include(router.urls)),

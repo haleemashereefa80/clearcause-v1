@@ -109,6 +109,14 @@ class DonationSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('id', 'status', 'gateway_order_id', 'gateway_payment_id', 'receipt_url', 'created_at')
 
+class AdminDonationSerializer(serializers.ModelSerializer):
+    campaign_title = serializers.CharField(source='campaign.title', read_only=True)
+    campaign_slug = serializers.CharField(source='campaign.slug', read_only=True)
+    
+    class Meta:
+        model = Donation
+        fields = '__all__'
+
 class BankAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = BankAccount

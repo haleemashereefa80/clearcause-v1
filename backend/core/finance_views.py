@@ -65,6 +65,15 @@ class DonationViewSet(viewsets.ModelViewSet):
         
         # Verify signature in production
         donation = Donation.objects.get(gateway_order_id=order_id)
+        
+        # Fetch payment details to get specific method
+        try:
+            client = get_razorpay_client()
+            payment_details = client.payment.fetch(payment_id)
+            donation.payment_method = payment_details.get('method')
+        except Exception as e:
+            print(f"Error fetching payment details: {e}")
+            
         donation.gateway_payment_id = payment_id
         donation.status = 'completed'
         donation.save()
@@ -78,6 +87,23 @@ class DonationViewSet(viewsets.ModelViewSet):
         send_donation_confirmation(donation.donor_email, donation.amount, campaign.title)
         
         return Response({'status': 'Payment confirmed'})
+
+    @action(detail=False, methods=['post'], url_path='confirm-failure')
+    def confirm_failure(self, request):
+        order_id = request.data.get('razorpay_order_id')
+        reason = request.data.get('reason', 'Unknown error')
+        payment_id = request.data.get('razorpay_payment_id')
+        
+        try:
+            donation = Donation.objects.get(gateway_order_id=order_id)
+            donation.status = 'failed'
+            donation.failure_reason = reason
+            if payment_id:
+                donation.gateway_payment_id = payment_id
+            donation.save()
+            return Response({'status': 'Failure recorded'})
+        except Donation.DoesNotExist:
+            return Response({'error': 'Donation not found'}, status=status.HTTP_404_NOT_FOUND)
 
 class WithdrawalViewSet(viewsets.ModelViewSet):
     queryset = Withdrawal.objects.all()

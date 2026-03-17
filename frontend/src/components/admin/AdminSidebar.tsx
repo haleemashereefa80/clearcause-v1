@@ -12,7 +12,7 @@ import {
     Building2,
     FileText,
     BarChart3,
-    Headset,
+    History,
     Bell,
     ShieldCheck,
     LogOut,
@@ -22,6 +22,7 @@ import {
 const menuItems = [
     { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { label: "Campaigns", href: "/admin/campaigns", icon: Heart },
+    { label: "Donations", href: "/admin/donations", icon: History },
     { label: "Users", href: "/admin/users", icon: Users },
     { label: "Withdrawals", href: "/admin/withdrawals", icon: Wallet },
     { label: "KYC Review", href: "/admin/kyc", icon: FileCheck },
@@ -29,7 +30,6 @@ const menuItems = [
     { label: "NGO Management", href: "/admin/ngos", icon: Building2 },
     { label: "Content", href: "/admin/content", icon: FileText },
     { label: "Reports", href: "/admin/reports", icon: BarChart3 },
-    { label: "RM Tools", href: "/admin/rm", icon: Headset },
     { label: "Alerts", href: "/admin/alerts", icon: Bell },
 ];
 

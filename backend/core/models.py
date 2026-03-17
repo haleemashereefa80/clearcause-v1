@@ -194,6 +194,8 @@ class Donation(models.Model):
     is_anonymous = models.BooleanField(default=False)
     donor_message = models.TextField(blank=True, null=True)
     receipt_url = models.URLField(max_length=500, blank=True, null=True)
+    failure_reason = models.TextField(blank=True, null=True)
+    payment_method = models.CharField(max_length=50, blank=True, null=True)
     utm_source = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
