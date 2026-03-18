@@ -40,20 +40,55 @@ class KYCDocumentSerializer(serializers.ModelSerializer):
     user_full_name = serializers.CharField(source='user.full_name', read_only=True)
     user_email = serializers.CharField(source='user.email', read_only=True)
     
+    document_front_url = serializers.SerializerMethodField()
+    document_back_url = serializers.SerializerMethodField()
+    
     class Meta:
         model = KYCDocument
         fields = '__all__'
         read_only_fields = ('id', 'user', 'status', 'reviewed_at', 'reviewed_by')
 
-class CampaignImageSerializer(serializers.ModelSerializer):
+    def get_document_front_url(self, obj):
+        if obj.document_front:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.document_front.url)
+            return obj.document_front.url
+        return None
+
+    def get_document_back_url(self, obj):
+        if obj.document_back:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.document_back.url)
+            return obj.document_back.url
+        return None
+
+    image_url = serializers.SerializerMethodField()
     class Meta:
         model = CampaignImage
         fields = '__all__'
 
-class CampaignMediaSerializer(serializers.ModelSerializer):
+    def get_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+
+    file_url = serializers.SerializerMethodField()
     class Meta:
         model = CampaignMedia
         fields = '__all__'
+
+    def get_file_url(self, obj):
+        if obj.file:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.file.url)
+            return obj.file.url
+        return None
 
 class CampaignUpdateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -61,15 +96,20 @@ class CampaignUpdateSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class CampaignDocumentSerializer(serializers.ModelSerializer):
+    file_url = serializers.SerializerMethodField()
     class Meta:
         model = CampaignDocument
         fields = '__all__'
 
-class VerificationDocumentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = VerificationDocument
-        fields = '__all__'
-        read_only_fields = ('id', 'is_verified', 'uploaded_at', 'verified_at', 'verified_by')
+    def get_file_url(self, obj):
+        if obj.file:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.file.url)
+            return obj.file.url
+        return None
+
+# VerificationDocumentSerializer already defined above with file_url
 
 class VerificationAssignmentSerializer(serializers.ModelSerializer):
     campaign_title = serializers.CharField(source='campaign.title', read_only=True)
@@ -149,9 +189,19 @@ class BankAccountSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'user', 'is_verified', 'created_at')
 
 class WithdrawalDocumentSerializer(serializers.ModelSerializer):
+    file_url = serializers.SerializerMethodField()
+    
     class Meta:
         model = WithdrawalDocument
         fields = '__all__'
+
+    def get_file_url(self, obj):
+        if obj.file:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.file.url)
+            return obj.file.url
+        return None
 
 class WithdrawalSerializer(serializers.ModelSerializer):
     documents = WithdrawalDocumentSerializer(many=True, read_only=True)
@@ -164,6 +214,22 @@ class WithdrawalSerializer(serializers.ModelSerializer):
         model = Withdrawal
         fields = '__all__'
         read_only_fields = ('id', 'organizer', 'status', 'processed_by', 'requested_at', 'processed_at')
+
+class VerificationDocumentSerializer(serializers.ModelSerializer):
+    file_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = VerificationDocument
+        fields = '__all__'
+        read_only_fields = ('id', 'is_verified', 'uploaded_at', 'verified_at', 'verified_by')
+
+    def get_file_url(self, obj):
+        if obj.file:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.file.url)
+            return obj.file.url
+        return None
 
 class NGOProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -187,11 +253,7 @@ class NotificationSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('id', 'created_at')
 
-class VerificationDocumentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = VerificationDocument
-        fields = '__all__'
-        read_only_fields = ('id', 'is_verified', 'uploaded_at', 'verified_at', 'verified_by')
+# Remove duplicated VerificationDocumentSerializer
 
 class AuditLogSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.full_name', read_only=True, default='System')
