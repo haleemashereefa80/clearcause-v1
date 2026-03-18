@@ -15,8 +15,8 @@ import {
 
 const menuItems = [
     { label: "Dashboard", href: "/volunteer/dashboard", icon: LayoutDashboard },
-    { label: "Active Jobs", href: "/volunteer/dashboard#active", icon: ClipboardList },
-    { label: "History", href: "/volunteer/dashboard#history", icon: History },
+    { label: "Active Jobs", href: "/volunteer/active-jobs", icon: ClipboardList },
+    { label: "History", href: "/volunteer/history", icon: History },
     { label: "My Profile", href: "/volunteer/profile", icon: User },
 ];
 
