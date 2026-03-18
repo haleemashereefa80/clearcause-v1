@@ -145,6 +145,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://clearcause-v1.vercel.app",
+    "https://clearcause-v1-haleemashereefa80s-projects.vercel.app",
 ]
 
 # Session & CSRF Settings
@@ -155,7 +156,8 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     CSRF_TRUSTED_ORIGINS = [
         "https://clearcause-v1.vercel.app",
-        "https://clearcause-v1.onrender.com"
+        "https://clearcause-v1.onrender.com",
+        "https://clearcause-v1-haleemashereefa80s-projects.vercel.app"
     ]
 else:
     SESSION_COOKIE_SAMESITE = 'Lax'
