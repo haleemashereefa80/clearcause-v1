@@ -17,8 +17,8 @@ urlpatterns = [
     path('api/v1/', include('core.urls')),
 ]
 
-if settings.DEBUG:
-    # Use custom serve view to allow professional PDF viewer to fetch PDFs across ports
-    urlpatterns += [
-        path('media/<path:path>', serve_with_cors, {'document_root': settings.MEDIA_ROOT}),
-    ]
+# Always serve media files (safe for Render web services without separate static hosting)
+# Use custom serve view to allow professional PDF viewer to fetch PDFs across ports
+urlpatterns += [
+    path('media/<path:path>', serve_with_cors, {'document_root': settings.MEDIA_ROOT}),
+]
