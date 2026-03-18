@@ -21,7 +21,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ('email', 'password', 'full_name', 'mobile', 'role')
 
     def create(self, validated_data):
-        # Generate a username since it's required by AbstractUser
         email = validated_data['email']
         username = email.split('@')[0] + "_" + str(random.randint(1000, 9999))
         
@@ -64,6 +63,7 @@ class KYCDocumentSerializer(serializers.ModelSerializer):
             return obj.document_back.url
         return None
 
+class CampaignImageSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
     class Meta:
         model = CampaignImage
@@ -77,6 +77,7 @@ class KYCDocumentSerializer(serializers.ModelSerializer):
             return obj.image.url
         return None
 
+class CampaignMediaSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
     class Meta:
         model = CampaignMedia
@@ -91,9 +92,18 @@ class KYCDocumentSerializer(serializers.ModelSerializer):
         return None
 
 class CampaignUpdateSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
     class Meta:
         model = CampaignUpdate
         fields = '__all__'
+
+    def get_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
 
 class CampaignDocumentSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
@@ -102,11 +112,11 @@ class CampaignDocumentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_file_url(self, obj):
-        if obj.file:
+        if obj.document:
             request = self.context.get('request')
             if request:
-                return request.build_absolute_uri(obj.file.url)
-            return obj.file.url
+                return request.build_absolute_uri(obj.document.url)
+            return obj.document.url
         return None
 
 class VerificationDocumentSerializer(serializers.ModelSerializer):
@@ -160,7 +170,6 @@ class CampaignSerializer(serializers.ModelSerializer):
         return None
 
 class AdminCampaignSerializer(serializers.ModelSerializer):
-    """Lightweight serializer for admin campaign listing (no nested relations)."""
     organizer_name = serializers.CharField(source='organizer.full_name', read_only=True)
     cover_image_url = serializers.SerializerMethodField()
     kyc_documents = KYCDocumentSerializer(many=True, read_only=True)
@@ -197,10 +206,19 @@ class AdminDonationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class BankAccountSerializer(serializers.ModelSerializer):
+    bank_proof_url = serializers.SerializerMethodField()
     class Meta:
         model = BankAccount
         fields = '__all__'
         read_only_fields = ('id', 'user', 'is_verified', 'created_at')
+
+    def get_bank_proof_url(self, obj):
+        if obj.bank_proof:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.bank_proof.url)
+            return obj.bank_proof.url
+        return None
 
 class WithdrawalDocumentSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
@@ -210,11 +228,11 @@ class WithdrawalDocumentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_file_url(self, obj):
-        if obj.file:
+        if obj.document:
             request = self.context.get('request')
             if request:
-                return request.build_absolute_uri(obj.file.url)
-            return obj.file.url
+                return request.build_absolute_uri(obj.document.url)
+            return obj.document.url
         return None
 
 class WithdrawalSerializer(serializers.ModelSerializer):
@@ -228,8 +246,6 @@ class WithdrawalSerializer(serializers.ModelSerializer):
         model = Withdrawal
         fields = '__all__'
         read_only_fields = ('id', 'organizer', 'status', 'processed_by', 'requested_at', 'processed_at')
-
-# VerificationDocumentSerializer moved up
 
 class NGOProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -252,7 +268,6 @@ class NotificationSerializer(serializers.ModelSerializer):
         model = Notification
         fields = '__all__'
         read_only_fields = ('id', 'created_at')
-
 
 class AuditLogSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.full_name', read_only=True, default='System')
