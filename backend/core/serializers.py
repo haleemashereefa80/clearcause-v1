@@ -109,7 +109,21 @@ class CampaignDocumentSerializer(serializers.ModelSerializer):
             return obj.file.url
         return None
 
-# VerificationDocumentSerializer already defined above with file_url
+class VerificationDocumentSerializer(serializers.ModelSerializer):
+    file_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = VerificationDocument
+        fields = '__all__'
+        read_only_fields = ('id', 'is_verified', 'uploaded_at', 'verified_at', 'verified_by')
+
+    def get_file_url(self, obj):
+        if obj.file:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.file.url)
+            return obj.file.url
+        return None
 
 class VerificationAssignmentSerializer(serializers.ModelSerializer):
     campaign_title = serializers.CharField(source='campaign.title', read_only=True)
@@ -215,21 +229,7 @@ class WithdrawalSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('id', 'organizer', 'status', 'processed_by', 'requested_at', 'processed_at')
 
-class VerificationDocumentSerializer(serializers.ModelSerializer):
-    file_url = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = VerificationDocument
-        fields = '__all__'
-        read_only_fields = ('id', 'is_verified', 'uploaded_at', 'verified_at', 'verified_by')
-
-    def get_file_url(self, obj):
-        if obj.file:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.file.url)
-            return obj.file.url
-        return None
+# VerificationDocumentSerializer moved up
 
 class NGOProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -253,7 +253,6 @@ class NotificationSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('id', 'created_at')
 
-# Remove duplicated VerificationDocumentSerializer
 
 class AuditLogSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.full_name', read_only=True, default='System')
